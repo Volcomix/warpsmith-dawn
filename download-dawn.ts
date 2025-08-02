@@ -21,11 +21,14 @@ function fetchDawnGitHub(relativeUrl: string) {
   });
 }
 
+console.log("Fetching Dawn release tags...");
 const tagsResponse = await fetchDawnGitHub("tags");
 const tags = await tagsResponse.json();
 
+console.log(`Found ${tags.length} tags, checking for artifacts...`);
+
 for (const tag of tags) {
-  console.log(`Processing tag: ${tag.name} (${tag.commit.sha})`);
+  process.stdout.write(`Checking ${tag.name}... `);
 
   const artifactsResponse = await fetchDawnGitHub(
     `actions/artifacts?name=Dawn-${tag.commit.sha}-ubuntu-latest-Release`
@@ -33,26 +36,25 @@ for (const tag of tags) {
   const artifacts = await artifactsResponse.json();
 
   if (artifacts.total_count === 0) {
-    console.warn(`No artifacts found for tag ${tag.name}`);
+    console.log("no artifacts");
     continue;
   }
 
   const artifact = artifacts.artifacts[0];
-  console.log(
-    `Found artifact: ${artifact.name} (${artifact.size_in_bytes} bytes)`
-  );
+  const sizeMB = (artifact.size_in_bytes / 1024 / 1024).toFixed(1);
+  console.log(`found (${sizeMB} MB)`);
 
+  console.log("Downloading...");
   const archiveResponse = await fetchDawnGitHub(
     `actions/artifacts/${artifact.id}/zip`
   );
 
   if (!archiveResponse.body) {
     throw new Error(
-      `Failed to download artifact ${artifact.name}: ${archiveResponse.statusText}`
+      `Failed to download artifact: ${archiveResponse.statusText}`
     );
   }
 
-  console.log(`Downloading artifact ${artifact.name}...`);
   const __dirname = dirname(fileURLToPath(import.meta.url));
   await mkdir(`${__dirname}/${downloadDir}`, { recursive: true });
   await pipeline(
@@ -60,5 +62,6 @@ for (const tag of tags) {
     createWriteStream(`${__dirname}/${downloadDir}/${artifact.name}.zip`)
   );
 
+  console.log(`Downloaded: ${artifact.name}.zip`);
   break;
 }
