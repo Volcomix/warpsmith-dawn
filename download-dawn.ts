@@ -1,3 +1,4 @@
+import child_process from "node:child_process";
 import { createWriteStream } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
@@ -5,6 +6,7 @@ import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { ReadableStream } from "node:stream/web";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 
 const downloadDir = "downloads";
 const repository = "google/dawn";
@@ -12,6 +14,7 @@ const repository = "google/dawn";
 process.loadEnvFile(".env.local");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const exec = promisify(child_process.exec);
 
 const githubToken = process.env.GITHUB_TOKEN;
 if (!githubToken) {
@@ -98,7 +101,27 @@ async function downloadDawnJson(tag: any) {
   console.log("Downloaded: dawn.json");
 }
 
-async function downloadLatestDawn() {
+async function extractArtifact(artifact: any) {
+  const artifactPath = `${__dirname}/${downloadDir}/${artifact.name}`;
+
+  console.log(`Unzipping...`);
+  await exec(`unzip -o ${artifactPath}.zip -d ${__dirname}/${downloadDir}`);
+
+  console.log("Extracting tar.gz...");
+  await exec(`tar -xzf ${artifactPath}.tar.gz -C ${__dirname}/${downloadDir}`);
+
+  console.log("Copying files...");
+  await exec(`cp -r ${artifactPath}/* ${__dirname}/${downloadDir}`);
+
+  console.log("Cleaning up...");
+  await exec(
+    `rm -rf ${artifactPath}.zip ${artifactPath}.tar.gz ${artifactPath}`
+  );
+
+  console.log(`Extracted to: ${__dirname}/${downloadDir}`);
+}
+
+async function retrieveLatestDawn() {
   const tags = await fetchTags();
 
   for (const tag of tags) {
@@ -106,10 +129,13 @@ async function downloadLatestDawn() {
     if (artifact) {
       console.log("Downloading...");
       await mkdir(`${__dirname}/${downloadDir}`, { recursive: true });
-      await Promise.all([downloadArtifact(artifact), downloadDawnJson(tag)]);
+      await Promise.all([
+        downloadArtifact(artifact).then(() => extractArtifact(artifact)),
+        downloadDawnJson(tag),
+      ]);
       break;
     }
   }
 }
 
-downloadLatestDawn();
+retrieveLatestDawn();
