@@ -8,12 +8,10 @@ import { fileURLToPath } from "node:url";
 
 const downloadDir = "downloads";
 const repository = "google/dawn";
-const platform = "ubuntu-latest-Release";
-const envFile = ".env.local";
+
+process.loadEnvFile(".env.local");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-process.loadEnvFile(envFile);
 
 const githubToken = process.env.GITHUB_TOKEN;
 if (!githubToken) {
@@ -34,11 +32,31 @@ async function fetchTags() {
   return tags;
 }
 
+function getPlatform() {
+  switch (process.platform) {
+    case "win32":
+      return "windows-latest";
+    case "linux":
+      return "ubuntu-latest";
+    case "darwin":
+      switch (process.arch) {
+        case "arm64":
+          return "macos-latest";
+        case "x64":
+          return "macos-13";
+        default:
+          throw new Error(`Unsupported architecture: ${process.arch}`);
+      }
+    default:
+      throw new Error(`Unsupported platform: ${process.platform}`);
+  }
+}
+
 async function findArtifactForTag(tag: any) {
   process.stdout.write(`Checking ${tag.name}... `);
 
   const response = await fetchFromDawnRepo(
-    `actions/artifacts?name=Dawn-${tag.commit.sha}-${platform}`
+    `actions/artifacts?name=Dawn-${tag.commit.sha}-${getPlatform()}-Release`
   );
   const artifacts = await response.json();
 
