@@ -101,7 +101,7 @@ async function downloadDawnJson(tag: any) {
   console.log("Downloaded: dawn.json");
 }
 
-async function extractArtifact(artifact: any) {
+async function extractBinaries(artifact: any) {
   const artifactPath = `${__dirname}/${dawnBinariesDir}/${artifact.name}`;
   const zipPath = `${artifactPath}.zip`;
   const tarGzPath = `${artifactPath}.tar.gz`;
@@ -137,7 +137,7 @@ async function setupDawnBinaries() {
       console.log("Downloading...");
       await mkdir(`${__dirname}/${dawnBinariesDir}`, { recursive: true });
       await Promise.all([
-        downloadArtifact(artifact).then(() => extractArtifact(artifact)),
+        downloadArtifact(artifact).then(() => extractBinaries(artifact)),
         downloadDawnJson(tag),
       ]);
       break;
