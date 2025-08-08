@@ -1,6 +1,6 @@
 import child_process from "node:child_process";
 import { createWriteStream } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { cp, mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
@@ -103,20 +103,27 @@ async function downloadDawnJson(tag: any) {
 
 async function extractArtifact(artifact: any) {
   const artifactPath = `${__dirname}/${dawnBinariesDir}/${artifact.name}`;
+  const zipPath = `${artifactPath}.zip`;
+  const tarGzPath = `${artifactPath}.tar.gz`;
 
   console.log(`Unzipping...`);
-  await exec(`unzip -o ${artifactPath}.zip -d ${__dirname}/${dawnBinariesDir}`);
+  await exec(`unzip -o ${zipPath} -d ${__dirname}/${dawnBinariesDir}`);
 
   console.log("Extracting tar.gz...");
-  await exec(`tar -xzf ${artifactPath}.tar.gz -C ${__dirname}/${dawnBinariesDir}`);
+  await exec(`tar -xzf ${tarGzPath} -C ${__dirname}/${dawnBinariesDir}`);
 
   console.log("Copying files...");
-  await exec(`cp -r ${artifactPath}/* ${__dirname}/${dawnBinariesDir}`);
+  await cp(artifactPath, `${__dirname}/${dawnBinariesDir}`, {
+    recursive: true,
+    force: true,
+  });
 
   console.log("Cleaning up...");
-  await exec(
-    `rm -rf ${artifactPath}.zip ${artifactPath}.tar.gz ${artifactPath}`
-  );
+  await Promise.all([
+    rm(zipPath, { force: true }),
+    rm(tarGzPath, { force: true }),
+    rm(artifactPath, { recursive: true, force: true }),
+  ]);
 
   console.log(`Extracted to: ${__dirname}/${dawnBinariesDir}`);
 }
