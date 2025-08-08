@@ -1,6 +1,9 @@
 {
   "type": "module",
   "devDependencies": {
-    "@types/node": "^24.1.0"
+    "@types/bindings": "^1.5.5",
+    "@types/node": "^24.1.0",
+    "bindings": "^1.5.0",
+    "node-addon-api": "^8.5.0"
   }
 }
