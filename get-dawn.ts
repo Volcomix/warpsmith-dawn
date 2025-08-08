@@ -8,7 +8,7 @@ import { ReadableStream } from "node:stream/web";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
-const downloadDir = "downloads";
+const dawnBinariesDir = "dawn-binaries";
 const repository = "google/dawn";
 
 process.loadEnvFile(".env.local");
@@ -85,7 +85,7 @@ async function downloadArtifact(artifact: any) {
 
   await pipeline(
     Readable.fromWeb(response.body as ReadableStream),
-    createWriteStream(`${__dirname}/${downloadDir}/${artifact.name}.zip`)
+    createWriteStream(`${__dirname}/${dawnBinariesDir}/${artifact.name}.zip`)
   );
 
   console.log(`Downloaded: ${artifact.name}.zip`);
@@ -97,38 +97,38 @@ async function downloadDawnJson(tag: any) {
   );
   const dawnJson = await response.json();
   const content = Buffer.from(dawnJson.content, "base64");
-  await writeFile(`${__dirname}/${downloadDir}/dawn.json`, content);
+  await writeFile(`${__dirname}/${dawnBinariesDir}/dawn.json`, content);
   console.log("Downloaded: dawn.json");
 }
 
 async function extractArtifact(artifact: any) {
-  const artifactPath = `${__dirname}/${downloadDir}/${artifact.name}`;
+  const artifactPath = `${__dirname}/${dawnBinariesDir}/${artifact.name}`;
 
   console.log(`Unzipping...`);
-  await exec(`unzip -o ${artifactPath}.zip -d ${__dirname}/${downloadDir}`);
+  await exec(`unzip -o ${artifactPath}.zip -d ${__dirname}/${dawnBinariesDir}`);
 
   console.log("Extracting tar.gz...");
-  await exec(`tar -xzf ${artifactPath}.tar.gz -C ${__dirname}/${downloadDir}`);
+  await exec(`tar -xzf ${artifactPath}.tar.gz -C ${__dirname}/${dawnBinariesDir}`);
 
   console.log("Copying files...");
-  await exec(`cp -r ${artifactPath}/* ${__dirname}/${downloadDir}`);
+  await exec(`cp -r ${artifactPath}/* ${__dirname}/${dawnBinariesDir}`);
 
   console.log("Cleaning up...");
   await exec(
     `rm -rf ${artifactPath}.zip ${artifactPath}.tar.gz ${artifactPath}`
   );
 
-  console.log(`Extracted to: ${__dirname}/${downloadDir}`);
+  console.log(`Extracted to: ${__dirname}/${dawnBinariesDir}`);
 }
 
-async function retrieveLatestDawn() {
+async function setupDawnBinaries() {
   const tags = await fetchTags();
 
   for (const tag of tags) {
     const artifact = await findArtifactForTag(tag);
     if (artifact) {
       console.log("Downloading...");
-      await mkdir(`${__dirname}/${downloadDir}`, { recursive: true });
+      await mkdir(`${__dirname}/${dawnBinariesDir}`, { recursive: true });
       await Promise.all([
         downloadArtifact(artifact).then(() => extractArtifact(artifact)),
         downloadDawnJson(tag),
@@ -138,4 +138,4 @@ async function retrieveLatestDawn() {
   }
 }
 
-retrieveLatestDawn();
+setupDawnBinaries();
