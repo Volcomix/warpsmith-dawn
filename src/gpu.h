@@ -1,6 +1,7 @@
 #ifndef GPU_H
 #define GPU_H
 
+#include "adapter.h"
 #include <napi.h>
 #include <webgpu/webgpu_cpp.h>
 
@@ -11,6 +12,7 @@ public:
   GPU(const Napi::CallbackInfo &info);
 
 private:
+  static Napi::FunctionReference constructor;
   Napi::Value RequestAdapter(const Napi::CallbackInfo &info);
   wgpu::Instance instance;
 };

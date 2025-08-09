@@ -1,4 +1,4 @@
-#include "gpu.h"
+#include "src/gpu.h"
 #include <napi.h>
 
 Napi::Object CreateInstance(const Napi::CallbackInfo &info) {
@@ -8,6 +8,7 @@ Napi::Object CreateInstance(const Napi::CallbackInfo &info) {
 Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
   exports.Set("createInstance", Napi::Function::New(env, CreateInstance));
   GPU::Init(env);
+  GPUAdapter::Init(env);
   return exports;
 }
 
