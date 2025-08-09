@@ -10,8 +10,10 @@ void GPUAdapter::Init(Napi::Env env) {
 }
 
 GPUAdapter::GPUAdapter(const Napi::CallbackInfo &info)
-    : Napi::ObjectWrap<GPUAdapter>(info) {}
+    : Napi::ObjectWrap<GPUAdapter>(info) {
+  this->adapter = info[0].As<Napi::External<wgpu::Adapter>>().Data();
+}
 
-Napi::Object GPUAdapter::NewInstance(Napi::Env env) {
-  return constructor.New({});
+Napi::Object GPUAdapter::NewInstance(Napi::Env env, wgpu::Adapter *adapter) {
+  return constructor.New({Napi::External<wgpu::Adapter>::New(env, adapter)});
 }

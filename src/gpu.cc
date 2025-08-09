@@ -25,7 +25,7 @@ Napi::Value GPU::RequestAdapter(const Napi::CallbackInfo &info) {
       [=](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter,
           const char *message) {
         if (status == wgpu::RequestAdapterStatus::Success) {
-          deferred.Resolve(GPUAdapter::NewInstance(env));
+          deferred.Resolve(GPUAdapter::NewInstance(env, &adapter));
         } else {
           deferred.Reject(Napi::String::New(env, message));
         }
