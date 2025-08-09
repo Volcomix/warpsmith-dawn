@@ -7,15 +7,15 @@
                 "<!(node -p \"require('node-addon-api').targets\"):node_addon_api"
             ],
             "include_dirs": ["dawn-binaries/include"],
+            "variables": {
+                "lib_dir": "lib",
+                "runtime_dir": "@loader_path",
+            },
+            "conditions": [
+                ["target_arch=='x64'", {"variables": {"lib_dir": "lib64"}}],
+                ["OS=='linux'", {"variables": {"runtime_dir": "'$$ORIGIN'"}}],
+            ],
             "link_settings": {
-                "variables": {
-                    "lib_dir": "lib",
-                    "conditions": [
-                        ["target_arch=='x64'", {"lib_dir": "lib64"}],
-                        ["OS=='linux'", {"runtime_dir": "'$$ORIGIN'"}],
-                        ["OS=='mac'", {"runtime_dir": "@loader_path"}],
-                    ],
-                },
                 "libraries": [
                     "-lwebgpu_dawn",
                     "-Wl,-rpath,<(runtime_dir)/../../dawn-binaries/<(lib_dir)",
