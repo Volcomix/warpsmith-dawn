@@ -11,7 +11,7 @@ public:
   GPU(const Napi::CallbackInfo &info);
 
 private:
-  void RequestAdapter(const Napi::CallbackInfo &info);
+  Napi::Value RequestAdapter(const Napi::CallbackInfo &info);
   wgpu::Instance instance;
 };
 

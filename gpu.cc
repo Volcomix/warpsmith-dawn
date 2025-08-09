@@ -20,13 +20,20 @@ Napi::Object GPU::NewInstance(Napi::Env env) {
   return scope.Escape(napi_value(obj)).ToObject();
 }
 
-void GPU::RequestAdapter(const Napi::CallbackInfo &info) {
+Napi::Value GPU::RequestAdapter(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
+
   this->instance.RequestAdapter(
       nullptr, wgpu::CallbackMode::AllowSpontaneous,
-      [](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter,
-         const char *message) {
-        if (status != wgpu::RequestAdapterStatus::Success) {
-          std::cerr << "Failed to request adapter: " << message << std::endl;
+      [=](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter,
+          const char *message) {
+        if (status == wgpu::RequestAdapterStatus::Success) {
+          deferred.Resolve(Napi::Object::New(env));
+        } else {
+          deferred.Reject(Napi::String::New(env, message));
         }
       });
+
+  return deferred.Promise();
 }
