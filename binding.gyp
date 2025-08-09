@@ -8,8 +8,19 @@
             ],
             "include_dirs": ["dawn-binaries/include"],
             "link_settings": {
-                "libraries": ["-lwebgpu_dawn", "-Wl,-rpath,dawn-binaries/lib"],
-                "library_dirs": ["../dawn-binaries/lib"],
+                "variables": {
+                    "lib_dir": "lib",
+                    "conditions": [
+                        ["target_arch=='x64'", {"lib_dir": "lib64"}],
+                        ["OS=='linux'", {"runtime_dir": "'$$ORIGIN'"}],
+                        ["OS=='mac'", {"runtime_dir": "@loader_path"}],
+                    ],
+                },
+                "libraries": [
+                    "-lwebgpu_dawn",
+                    "-Wl,-rpath,<(runtime_dir)/../../dawn-binaries/<(lib_dir)",
+                ],
+                "library_dirs": ["<(module_root_dir)/dawn-binaries/<(lib_dir)"],
             },
         }
     ]
