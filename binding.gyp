@@ -1,8 +1,8 @@
 {
     "targets": [
         {
-            "target_name": "hello",
-            "sources": ["hello.cc"],
+            "target_name": "dawn",
+            "sources": ["dawn.cc", "instance.cc"],
             "dependencies": [
                 "<!(node -p \"require('node-addon-api').targets\"):node_addon_api"
             ],
