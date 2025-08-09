@@ -7,6 +7,7 @@ void GPU::Init(Napi::Env env) {
       env, "GPU", {InstanceMethod("requestAdapter", &GPU::RequestAdapter)});
 
   constructor = Napi::Persistent(func);
+  constructor.SuppressDestruct();
 }
 
 GPU::GPU(const Napi::CallbackInfo &info) : Napi::ObjectWrap<GPU>(info) {
