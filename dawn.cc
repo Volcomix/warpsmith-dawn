@@ -1,13 +1,13 @@
-#include "instance.h"
+#include "gpu.h"
 #include <napi.h>
 
 Napi::Object CreateInstance(const Napi::CallbackInfo &info) {
-  return Instance::NewInstance(info.Env());
+  return GPU::NewInstance(info.Env());
 }
 
 Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
   exports.Set("createInstance", Napi::Function::New(env, CreateInstance));
-  Instance::Init(env);
+  GPU::Init(env);
   return exports;
 }
 

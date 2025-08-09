@@ -7,3 +7,4 @@ const gpu: GPU = dawn.createInstance();
 console.log(gpu);
 
 const adapter = await gpu.requestAdapter();
+console.log(adapter);

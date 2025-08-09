@@ -1,17 +1,18 @@
-#ifndef INSTANCE_H
-#define INSTANCE_H
+#ifndef GPU_H
+#define GPU_H
 
 #include <napi.h>
 #include <webgpu/webgpu_cpp.h>
 
-class Instance : public Napi::ObjectWrap<Instance> {
+class GPU : public Napi::ObjectWrap<GPU> {
 public:
   static void Init(Napi::Env env);
   static Napi::Object NewInstance(Napi::Env env);
-  Instance(const Napi::CallbackInfo &info);
+  GPU(const Napi::CallbackInfo &info);
 
 private:
+  void RequestAdapter(const Napi::CallbackInfo &info);
   wgpu::Instance instance;
 };
 
-#endif // INSTANCE_H
+#endif // GPU_H
