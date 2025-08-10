@@ -38,19 +38,19 @@ async function generateSource(
   const functions = enumNames.map((enumName) => {
     const name = generateName(enumName);
 
+    const values = dawnJson[enumName].values
+      .filter(({ tags }) => !tags?.includes("dawn"))
+      .map(({ name: value, jsrepr }) => {
+        value = generateName(value);
+        const jsValue = jsrepr.replace(/^'(.*)'$/, "$1");
+        return `  case wgpu::${name.pascalCase}::${value.pascalCase}:
+    return Napi::String::New(env, "${jsValue}");`;
+      });
+
     return `
 ${generateFunction(enumName)} {
   switch (value) {
-  ${dawnJson[enumName].values
-    .filter(({ tags }) => !tags?.includes("dawn"))
-    .map(({ name: value, jsrepr }) => {
-      value = generateName(value);
-      return `
-  case wgpu::${name.pascalCase}::${value.pascalCase}:
-    return Napi::String::New(env, "${jsrepr.replace(/^'(.*)'$/, "$1")}");
-          `.trim();
-    })
-    .join("\n  ")}
+${values.join("\n")}
   default:
     return Napi::String::New(env, "");
   }
