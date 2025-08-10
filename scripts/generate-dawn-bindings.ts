@@ -29,7 +29,7 @@ async function generateDawnBindings() {
 
   const root = "adapter";
   process.stdout.write(`${root}... `);
-  sources.push(await generateClass(root, outputDir));
+  sources.push(await generateClass(root, dawnJson, outputDir));
   console.log("done");
 
   process.stdout.write("enums... ");

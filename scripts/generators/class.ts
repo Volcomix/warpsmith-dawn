@@ -1,8 +1,43 @@
 import { writeFile } from "node:fs/promises";
 import { generateName } from "./name.ts";
 
-async function generateHeader(objectName: string, outputDir: string) {
+async function generateHeader(
+  objectName: string,
+  dawnJson: any,
+  outputDir: string
+) {
   const name = generateName(objectName);
+
+  const getters = dawnJson[objectName].methods
+    .filter(
+      ({ name, tags }) => name.startsWith("get ") && !tags?.includes("dawn")
+    )
+    .map(({ name, args }) => {
+      const getterName = name.replace(/^get /, "");
+      const returnTypeName = args[0].type;
+      const returnTypeJson = dawnJson[returnTypeName];
+      let returnType: any;
+      if (returnTypeJson.category === "structure") {
+        if (
+          returnTypeJson.members.length === 2 &&
+          returnTypeJson.members[1].annotation === "const*" &&
+          returnTypeJson.members[1].length
+        ) {
+          returnType = returnTypeJson.members[1].type;
+        } else {
+          returnType = returnTypeJson.members.map(
+            ({ name, type }) => `${name}: ${type}`
+          );
+        }
+      } else {
+        throw new Error(
+          `Unsupported return type for getter ${getterName}: ${returnTypeName}`
+        );
+      }
+      return { getterName, returnTypeName, returnType };
+    });
+
+  console.log(getters);
 
   const content = `
 #ifndef ${name.includeGuard}
@@ -58,7 +93,11 @@ Napi::Object ${name.webgpuClass}::NewInstance(Napi::Env env, wgpu::${name.pascal
   return sourceFileName;
 }
 
-export async function generateClass(objectName: string, outputDir: string) {
-  await generateHeader(objectName, outputDir);
+export async function generateClass(
+  objectName: string,
+  dawnJson: any,
+  outputDir: string
+) {
+  await generateHeader(objectName, dawnJson, outputDir);
   return await generateSource(objectName, outputDir);
 }
