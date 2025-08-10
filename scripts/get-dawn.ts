@@ -1,20 +1,20 @@
 import child_process from "node:child_process";
 import { createWriteStream } from "node:fs";
 import { cp, mkdir, rm, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { ReadableStream } from "node:stream/web";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
-const dawnBinariesDir = "dawn-binaries";
+const exec = promisify(child_process.exec);
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 const repository = "google/dawn";
+const dawnBinariesDir = join(__dirname, "../dawn-binaries");
 
 process.loadEnvFile(".env.local");
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const exec = promisify(child_process.exec);
 
 const githubToken = process.env.GITHUB_TOKEN;
 if (!githubToken) {
@@ -85,7 +85,7 @@ async function downloadArtifact(artifact: any) {
 
   await pipeline(
     Readable.fromWeb(response.body as ReadableStream),
-    createWriteStream(`${__dirname}/${dawnBinariesDir}/${artifact.name}.zip`)
+    createWriteStream(`${dawnBinariesDir}/${artifact.name}.zip`)
   );
 
   console.log(`Downloaded: ${artifact.name}.zip`);
@@ -97,23 +97,23 @@ async function downloadDawnJson(tag: any) {
   );
   const dawnJson = await response.json();
   const content = Buffer.from(dawnJson.content, "base64");
-  await writeFile(`${__dirname}/${dawnBinariesDir}/dawn.json`, content);
+  await writeFile(`${dawnBinariesDir}/dawn.json`, content);
   console.log("Downloaded: dawn.json");
 }
 
 async function extractBinaries(artifact: any) {
-  const artifactPath = `${__dirname}/${dawnBinariesDir}/${artifact.name}`;
+  const artifactPath = `${dawnBinariesDir}/${artifact.name}`;
   const zipPath = `${artifactPath}.zip`;
   const tarGzPath = `${artifactPath}.tar.gz`;
 
   console.log(`Unzipping...`);
-  await exec(`unzip -o ${zipPath} -d ${__dirname}/${dawnBinariesDir}`);
+  await exec(`unzip -o ${zipPath} -d ${dawnBinariesDir}`);
 
   console.log("Extracting tar.gz...");
-  await exec(`tar -xzf ${tarGzPath} -C ${__dirname}/${dawnBinariesDir}`);
+  await exec(`tar -xzf ${tarGzPath} -C ${dawnBinariesDir}`);
 
   console.log("Copying files...");
-  await cp(artifactPath, `${__dirname}/${dawnBinariesDir}`, {
+  await cp(artifactPath, `${dawnBinariesDir}`, {
     recursive: true,
     force: true,
   });
@@ -125,7 +125,7 @@ async function extractBinaries(artifact: any) {
     rm(artifactPath, { recursive: true, force: true }),
   ]);
 
-  console.log(`Extracted to: ${__dirname}/${dawnBinariesDir}`);
+  console.log(`Extracted to: ${dawnBinariesDir}`);
 }
 
 async function setupDawnBinaries() {
@@ -135,7 +135,7 @@ async function setupDawnBinaries() {
     const artifact = await findArtifactForTag(tag);
     if (artifact) {
       console.log("Downloading...");
-      await mkdir(`${__dirname}/${dawnBinariesDir}`, { recursive: true });
+      await mkdir(`${dawnBinariesDir}`, { recursive: true });
       await Promise.all([
         downloadArtifact(artifact).then(() => extractBinaries(artifact)),
         downloadDawnJson(tag),

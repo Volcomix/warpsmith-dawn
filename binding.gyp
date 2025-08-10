@@ -2,7 +2,8 @@
     "targets": [
         {
             "target_name": "dawn",
-            "sources": ["dawn.cc", "src/gpu.cc", "src/adapter.cc"],
+            "sources": ["src/dawn.cc", "src/gpu.cc"],
+            "includes": ["src/generated/binding.gypi"],
             "dependencies": [
                 "<!(node -p \"require('node-addon-api').targets\"):node_addon_api"
             ],

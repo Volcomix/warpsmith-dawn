@@ -1,5 +1,10 @@
 {
   "type": "module",
+  "scripts": {
+    "dawn:get": "node scripts/get-dawn.ts",
+    "dawn:gen": "node scripts/generate-dawn-bindings.ts",
+    "test": "node test/bindings.ts"
+  },
   "devDependencies": {
     "@types/bindings": "^1.5.5",
     "@types/node": "^24.2.1",

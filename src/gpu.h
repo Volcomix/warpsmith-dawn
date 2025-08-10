@@ -1,7 +1,7 @@
 #ifndef GPU_H
 #define GPU_H
 
-#include "adapter.h"
+#include "generated/adapter.h"
 #include <napi.h>
 #include <webgpu/webgpu_cpp.h>
 

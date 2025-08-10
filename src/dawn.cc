@@ -1,4 +1,4 @@
-#include "src/gpu.h"
+#include "gpu.h"
 #include <napi.h>
 
 Napi::Object CreateInstance(const Napi::CallbackInfo &info) {
