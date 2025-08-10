@@ -2,9 +2,8 @@ import { mkdir, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { generateBindingGypi } from "./generators/binding-gypi.ts";
+import { generateClass } from "./generators/class.ts";
 import { generateEnums } from "./generators/enums.ts";
-import { generateHeader } from "./generators/header.ts";
-import { generateSource } from "./generators/source.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const outputDir = join(__dirname, "../src/generated");
@@ -30,8 +29,7 @@ async function generateDawnBindings() {
 
   const root = "adapter";
   process.stdout.write(`${root}... `);
-  await generateHeader(root, outputDir);
-  sources.push(await generateSource(root, outputDir));
+  sources.push(await generateClass(root, outputDir));
   console.log("done");
 
   process.stdout.write("enums... ");
