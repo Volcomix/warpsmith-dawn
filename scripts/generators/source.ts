@@ -5,7 +5,7 @@ export async function generateSource(objectName: string, outputDir: string) {
   const name = generateName(objectName);
 
   const content = `
-#include "${name.file}.h"
+#include "${name.kebabCase}.h"
 
 Napi::FunctionReference ${name.webgpuClass}::constructor;
 
@@ -18,15 +18,15 @@ void ${name.webgpuClass}::Init(Napi::Env env) {
 
 ${name.webgpuClass}::${name.webgpuClass}(const Napi::CallbackInfo &info)
     : Napi::ObjectWrap<${name.webgpuClass}>(info) {
-  this->${name.delegate} = info[0].As<Napi::External<wgpu::${name.dawnClass}>>().Data();
+  this->${name.camelCase} = info[0].As<Napi::External<wgpu::${name.pascalCase}>>().Data();
 }
 
-Napi::Object ${name.webgpuClass}::NewInstance(Napi::Env env, wgpu::${name.dawnClass} *${name.delegate}) {
-  return constructor.New({Napi::External<wgpu::${name.dawnClass}>::New(env, ${name.delegate})});
+Napi::Object ${name.webgpuClass}::NewInstance(Napi::Env env, wgpu::${name.pascalCase} *${name.camelCase}) {
+  return constructor.New({Napi::External<wgpu::${name.pascalCase}>::New(env, ${name.camelCase})});
 }
   `;
 
-  const sourceFileName = `${name.file}.cc`;
+  const sourceFileName = `${name.kebabCase}.cc`;
   await writeFile(`${outputDir}/${sourceFileName}`, content.trim());
   return sourceFileName;
 }

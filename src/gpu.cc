@@ -3,8 +3,13 @@
 Napi::FunctionReference GPU::constructor;
 
 void GPU::Init(Napi::Env env) {
-  Napi::Function func = DefineClass(
-      env, "GPU", {InstanceMethod("requestAdapter", &GPU::RequestAdapter)});
+  Napi::Function func =
+      DefineClass(env, "GPU",
+                  {
+                      InstanceMethod("requestAdapter", &GPU::RequestAdapter),
+                      InstanceAccessor("wgslLanguageFeatures",
+                                       &GPU::GetWGSLLanguageFeatures, nullptr),
+                  });
 
   constructor = Napi::Persistent(func);
   constructor.SuppressDestruct();
@@ -32,4 +37,21 @@ Napi::Value GPU::RequestAdapter(const Napi::CallbackInfo &info) {
       });
 
   return deferred.Promise();
+}
+
+Napi::Value GPU::GetWGSLLanguageFeatures(const Napi::CallbackInfo &info) {
+  wgpu::SupportedWGSLLanguageFeatures supportedFeatures;
+  this->instance.GetWGSLLanguageFeatures(&supportedFeatures);
+
+  Napi::Env env = info.Env();
+  Napi::Object result = env.Global().Get("Set").As<Napi::Function>().New({});
+  for (size_t i = 0; i < supportedFeatures.featureCount; i++) {
+    wgpu::WGSLLanguageFeatureName feature = supportedFeatures.features[i];
+    Napi::String featureName = ConvertWGSLLanguageFeatureName(env, feature);
+    if (!featureName.Utf8Value().empty()) {
+      result.Get("add").As<Napi::Function>().Call(result, {featureName});
+    }
+  }
+
+  return result;
 }

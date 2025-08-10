@@ -14,16 +14,16 @@ export async function generateHeader(objectName: string, outputDir: string) {
 class ${name.webgpuClass} : public Napi::ObjectWrap<${name.webgpuClass}> {
 public:
   static void Init(Napi::Env env);
-  static Napi::Object NewInstance(Napi::Env env, wgpu::${name.dawnClass} *${name.delegate});
+  static Napi::Object NewInstance(Napi::Env env, wgpu::${name.pascalCase} *${name.camelCase});
   ${name.webgpuClass}(const Napi::CallbackInfo &info);
 
 private:
   static Napi::FunctionReference constructor;
-  wgpu::${name.dawnClass} *${name.delegate};
+  wgpu::${name.pascalCase} *${name.camelCase};
 };
 
 #endif // ${name.includeGuard}
   `;
 
-  await writeFile(`${outputDir}/${name.file}.h`, content.trim());
+  await writeFile(`${outputDir}/${name.kebabCase}.h`, content.trim());
 }

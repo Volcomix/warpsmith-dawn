@@ -2,6 +2,7 @@
 #define GPU_H
 
 #include "generated/adapter.h"
+#include "generated/enums.h"
 #include <napi.h>
 #include <webgpu/webgpu_cpp.h>
 
@@ -13,8 +14,9 @@ public:
 
 private:
   static Napi::FunctionReference constructor;
-  Napi::Value RequestAdapter(const Napi::CallbackInfo &info);
   wgpu::Instance instance;
+  Napi::Value RequestAdapter(const Napi::CallbackInfo &info);
+  Napi::Value GetWGSLLanguageFeatures(const Napi::CallbackInfo &info);
 };
 
 #endif // GPU_H
