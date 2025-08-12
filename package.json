@@ -3,6 +3,7 @@
   "scripts": {
     "dawn:get": "node scripts/get-dawn.ts",
     "dawn:gen": "node scripts/generate-dawn-bindings.ts",
+    "build": "node-gyp build",
     "test": "node test/bindings.ts"
   },
   "devDependencies": {
