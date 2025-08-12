@@ -13,6 +13,9 @@ public:
 private:
   static Napi::FunctionReference constructor;
   wgpu::Adapter *adapter;
+  Napi::Value GetLimits(const Napi::CallbackInfo &info);
+  Napi::Value GetInfo(const Napi::CallbackInfo &info);
+  Napi::Value GetFeatures(const Napi::CallbackInfo &info);
 };
 
 #endif // ADAPTER_H

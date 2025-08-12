@@ -8,7 +8,7 @@ async function generateHeader(
 ) {
   const name = generateName(objectName);
 
-  const getters = dawnJson[objectName].methods
+  let getters = dawnJson[objectName].methods
     .filter(
       ({ name, tags }) => name.startsWith("get ") && !tags?.includes("dawn")
     )
@@ -16,28 +16,41 @@ async function generateHeader(
       const getterName = name.replace(/^get /, "");
       const returnTypeName = args[0].type;
       const returnTypeJson = dawnJson[returnTypeName];
-      let returnType: any;
       if (returnTypeJson.category === "structure") {
         if (
           returnTypeJson.members.length === 2 &&
           returnTypeJson.members[1].annotation === "const*" &&
           returnTypeJson.members[1].length
         ) {
-          returnType = returnTypeJson.members[1].type;
+          return {
+            getterName,
+            returnTypeName,
+            returnType: `readonly set of: ${returnTypeJson.members[1].type}`,
+          };
         } else {
-          returnType = returnTypeJson.members.map(
-            ({ name, type }) => `${name}: ${type}`
-          );
+          return {
+            getterName,
+            returnTypeName,
+            members: returnTypeJson.members
+              .filter(
+                (member: any) => !dawnJson[member.type].emscripten_no_enum_table
+              )
+              .map(({ name, type }) => `${name}: ${type}`),
+          };
         }
       } else {
         throw new Error(
           `Unsupported return type for getter ${getterName}: ${returnTypeName}`
         );
       }
-      return { getterName, returnTypeName, returnType };
     });
 
   console.log(getters);
+
+  getters = getters.map((getter) => {
+    const name = generateName(getter.getterName);
+    return `Napi::Value Get${name.pascalCase}(const Napi::CallbackInfo &info);`;
+  });
 
   const content = `
 #ifndef ${name.includeGuard}
@@ -49,12 +62,15 @@ async function generateHeader(
 class ${name.webgpuClass} : public Napi::ObjectWrap<${name.webgpuClass}> {
 public:
   static void Init(Napi::Env env);
-  static Napi::Object NewInstance(Napi::Env env, wgpu::${name.pascalCase} *${name.camelCase});
+  static Napi::Object NewInstance(Napi::Env env, wgpu::${name.pascalCase} *${
+    name.camelCase
+  });
   ${name.webgpuClass}(const Napi::CallbackInfo &info);
 
 private:
   static Napi::FunctionReference constructor;
   wgpu::${name.pascalCase} *${name.camelCase};
+  ${getters.join("\n  ")}
 };
 
 #endif // ${name.includeGuard}
