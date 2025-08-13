@@ -56,7 +56,6 @@ function extractCMakeCommand(detailsText: string): string[] {
     ".",
     "-B",
     "out/Release",
-    "-DDAWN_FETCH_DEPENDENCIES=ON",
     ...command.slice(5).map((arg: string) => arg.replace(/\.\.\/src/, "src")),
   ];
 }
