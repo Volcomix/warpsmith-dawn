@@ -35,12 +35,8 @@ jobs:
       - name: Build
         working-directory: dawn
         run: |
-          cmake -S . -B out/Release \
-            -DDAWN_FETCH_DEPENDENCIES=ON \
-            -DDAWN_ENABLE_INSTALL=ON \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_C_FLAGS="-DPROTOBUF_CONSTINIT=" \
-            -DCMAKE_CXX_FLAGS="-DPROTOBUF_CONSTINIT="
+          sudo xcode-select --switch /Applications/Xcode_15.0.1.app
+          cmake -S . -B out/Release -DDAWN_FETCH_DEPENDENCIES=ON -DDAWN_ENABLE_INSTALL=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build out/Release
           cmake --install out/Release --prefix install/Release
           ls -alrt install/Release
