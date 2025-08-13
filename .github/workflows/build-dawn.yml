@@ -4,30 +4,38 @@ jobs:
   build-dawn:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      # - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: latest
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: latest
 
-      - run: |
-          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          echo "$GITHUB_WORKSPACE/depot_tools" >> $GITHUB_PATH
+      # - run: |
+      #     git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+      #     echo "$GITHUB_WORKSPACE/depot_tools" >> $GITHUB_PATH
 
       - run: git clone https://dawn.googlesource.com/dawn
 
-      - name: Install dependencies
-        working-directory: dawn
-        run: |
-          cp scripts/standalone.gclient .gclient
-          gclient metrics --opt-out
-          gclient sync
+      # - name: Install dependencies
+      #   working-directory: dawn
+      #   run: |
+      #     cp scripts/standalone.gclient .gclient
+      #     gclient metrics --opt-out
+      #     gclient sync
+
+      # - name: Build
+      #   working-directory: dawn
+      #   run: |
+      #     node ../scripts/write-dawn-cmake-command.ts cmake-command.txt
+      #     $(cat cmake-command.txt)
+      #     cmake --build out/Release
+      #     cmake --install out/Release --prefix install/Release
+      #     ls -alrt install/Release
 
       - name: Build
         working-directory: dawn
         run: |
-          node ../scripts/write-dawn-cmake-command.ts cmake-command.txt
-          $(cat cmake-command.txt)
+          cmake -S . -B out/Release -DDAWN_FETCH_DEPENDENCIES=ON -DDAWN_ENABLE_INSTALL=ON -DCMAKE_BUILD_TYPE=Release -DPROTOBUF_CONSTINIT=
           cmake --build out/Release
           cmake --install out/Release --prefix install/Release
           ls -alrt install/Release
