@@ -56,7 +56,9 @@ function extractCMakeCommand(detailsText: string): string[] {
     ".",
     "-B",
     "out/Release",
-    ...command.slice(5).map((arg: string) => arg.replace(/\.\.\/src/, "src")),
+    ...command
+      .slice(5)
+      .filter((arg: string) => !arg.startsWith("-DCMAKE_TOOLCHAIN_FILE=")),
   ];
 }
 
