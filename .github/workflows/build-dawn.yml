@@ -20,6 +20,7 @@ jobs:
         working-directory: dawn
         run: |
           cp scripts/standalone.gclient .gclient
+          gclient metrics --opt-out
           gclient sync
 
       - name: Build
