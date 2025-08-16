@@ -3,7 +3,7 @@ on: push
 jobs:
   build-dawn:
     name: Build Dawn
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - name: Clone Dawn Repository
         run: git clone --depth=1 https://dawn.googlesource.com/dawn
@@ -19,8 +19,6 @@ jobs:
           -DDAWN_BUILD_PROTOBUF=OFF
           -DTINT_BUILD_CMD_TOOLS=OFF
           -DTINT_BUILD_TESTS=OFF
-          -DCMAKE_CXX_COMPILER=clang++
-          -DCMAKE_C_COMPILER=clang
 
       - name: Build
         working-directory: dawn
@@ -29,5 +27,5 @@ jobs:
       - name: Package
         working-directory: dawn
         run: |
-          cmake --install out/Release --prefix Dawn-macos-14
+          cmake --install out/Release --config Release --prefix Dawn-macos-14
           cmake -E tar cvzf Dawn-macos-14.tar.gz Dawn-macos-14
