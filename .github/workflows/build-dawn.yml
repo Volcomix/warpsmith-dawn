@@ -2,8 +2,13 @@ name: Build Dawn
 on: push
 jobs:
   build-dawn:
-    name: Build Dawn
-    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15]
+
+    name: Build Dawn on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Clone Dawn repository
         run: git clone --depth=1 https://dawn.googlesource.com/dawn
@@ -28,11 +33,11 @@ jobs:
       - name: Package
         working-directory: dawn
         run: |
-          cmake --install out/Release --prefix Dawn-macos-15
-          cmake -E tar cvzf Dawn-macos-15.tar.gz Dawn-macos-15
+          cmake --install out/Release --prefix dawn-${{ matrix.os}}
+          cmake -E tar cvzf dawn-${{ matrix.os}}.tar.gz dawn-${{ matrix.os}}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Dawn-macos-15
-          path: dawn/Dawn-macos-15.tar.gz
+          name: dawn-${{ matrix.os}}
+          path: dawn/dawn-${{ matrix.os}}.tar.gz
