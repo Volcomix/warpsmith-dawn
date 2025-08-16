@@ -13,16 +13,17 @@ jobs:
         run: >
           cmake -S . -B out/Release
           -DDAWN_FETCH_DEPENDENCIES=ON
+          -DDAWN_ENABLE_INSTALL=ON
+          -DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED
           -DDAWN_BUILD_SAMPLES=OFF
           -DDAWN_BUILD_PROTOBUF=OFF
           -DTINT_BUILD_CMD_TOOLS=OFF
           -DTINT_BUILD_TESTS=OFF
-          -DDAWN_ENABLE_INSTALL=ON
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         working-directory: dawn
-        run: cmake --build out/Release --target dawn_native
+        run: cmake --build out/Release
 
       - name: Package
         working-directory: dawn
