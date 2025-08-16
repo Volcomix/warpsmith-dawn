@@ -8,6 +8,9 @@ jobs:
       - name: Clone Dawn Repository
         run: git clone https://dawn.googlesource.com/dawn
 
+      - name: Select XCode
+        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
+
       - name: Configure CMake
         working-directory: dawn
         run: >
