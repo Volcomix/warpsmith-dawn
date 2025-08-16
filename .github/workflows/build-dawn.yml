@@ -5,7 +5,7 @@ jobs:
     name: Build Dawn
     runs-on: macos-15
     steps:
-      - name: Clone Dawn Repository
+      - name: Clone Dawn repository
         run: git clone --depth=1 https://dawn.googlesource.com/dawn
 
       - name: Configure CMake
@@ -35,4 +35,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Dawn-macos-15
-          path: Dawn-macos-15.tar.gz
+          path: dawn/Dawn-macos-15.tar.gz
