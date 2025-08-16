@@ -6,12 +6,20 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-15]
+        exclude:
+          - os: macos-15
 
     name: Build Dawn on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
       - name: Clone Dawn repository
         run: git clone --depth=1 https://dawn.googlesource.com/dawn
+
+      - run: |
+          sudo apt-get update
+          sudo apt-get install \
+            libxrandr-dev libxinerama-dev libxcursor-dev \
+            mesa-common-dev libx11-xcb-dev pkg-config
 
       - name: Configure CMake
         working-directory: dawn
