@@ -2,35 +2,9 @@ name: Build Dawn
 on: push
 jobs:
   build-dawn:
-    runs-on: macos-15
+    runs-on: macos-14
     steps:
-      # - uses: actions/checkout@v5
-
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version: latest
-
-      # - run: |
-      #     git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-      #     echo "$GITHUB_WORKSPACE/depot_tools" >> $GITHUB_PATH
-
       - run: git clone https://dawn.googlesource.com/dawn
-
-      # - name: Install dependencies
-      #   working-directory: dawn
-      #   run: |
-      #     cp scripts/standalone.gclient .gclient
-      #     gclient metrics --opt-out
-      #     gclient sync
-
-      # - name: Build
-      #   working-directory: dawn
-      #   run: |
-      #     node ../scripts/write-dawn-cmake-command.ts cmake-command.txt
-      #     $(cat cmake-command.txt)
-      #     cmake --build out/Release
-      #     cmake --install out/Release --prefix install/Release
-      #     ls -alrt install/Release
 
       - name: Configure CMake
         working-directory: dawn
@@ -51,5 +25,5 @@ jobs:
       - name: Package
         working-directory: dawn
         run: |
-          cmake --install out/Release --prefix install/Release
-          ls -alrt install/Release
+          cmake --install out/Release --prefix Dawn-macos-14
+          cmake -E tar cvzf Dawn-macos-14.tar.gz Dawn-macos-14
