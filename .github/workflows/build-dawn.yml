@@ -32,10 +32,24 @@ jobs:
       #     cmake --install out/Release --prefix install/Release
       #     ls -alrt install/Release
 
+      - name: Configure CMake
+        working-directory: dawn
+        run: >
+          cmake -S . -B out/Release
+          -DDAWN_FETCH_DEPENDENCIES=ON
+          -DDAWN_ENABLE_INSTALL=ON
+          -DCMAKE_BUILD_TYPE=Release
+          -DDAWN_BUILD_SAMPLES=OFF
+          -DDAWN_BUILD_PROTOBUF=OFF
+          -DTINT_BUILD_CMD_TOOLS=OFF
+          -DTINT_BUILD_TESTS=OFF
+
       - name: Build
         working-directory: dawn
+        run: cmake --build out/Release
+
+      - name: Package
+        working-directory: dawn
         run: |
-          cmake -S . -B out/Release -DDAWN_FETCH_DEPENDENCIES=ON -DDAWN_ENABLE_INSTALL=ON -DCMAKE_BUILD_TYPE=Release
-          cmake --build out/Release
           cmake --install out/Release --prefix install/Release
           ls -alrt install/Release
