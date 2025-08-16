@@ -3,7 +3,7 @@ on: push
 jobs:
   build-dawn:
     name: Build Dawn
-    runs-on: macos-15
+    runs-on: macos-14
     steps:
       - name: Clone Dawn Repository
         run: git clone --depth=1 https://dawn.googlesource.com/dawn
@@ -13,12 +13,13 @@ jobs:
         run: >
           cmake -S . -B out/Release
           -DDAWN_FETCH_DEPENDENCIES=ON
-          -DDAWN_ENABLE_INSTALL=ON
-          -DCMAKE_BUILD_TYPE=Release
           -DDAWN_BUILD_SAMPLES=OFF
           -DDAWN_BUILD_PROTOBUF=OFF
           -DTINT_BUILD_CMD_TOOLS=OFF
           -DTINT_BUILD_TESTS=OFF
+          -DDAWN_ENABLE_INSTALL=ON
+          -DCMAKE_CXX_STANDARD=20
+          -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         working-directory: dawn
