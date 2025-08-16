@@ -23,7 +23,7 @@ jobs:
 
       - name: Build
         working-directory: dawn
-        run: cmake --build out/Release
+        run: cmake --build out/Release --target webgpu_dawn
 
       - name: Package
         working-directory: dawn
