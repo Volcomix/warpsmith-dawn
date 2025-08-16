@@ -1,5 +1,8 @@
 name: Build Dawn
-on: push
+on:
+  push:
+  # schedule:
+  #   - cron: "0 5 * * *"
 jobs:
   build-dawn:
     strategy:
@@ -15,7 +18,9 @@ jobs:
       - name: Clone Dawn repository
         run: git clone --depth=1 https://dawn.googlesource.com/dawn
 
-      - run: |
+      - name: Install dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
           sudo apt-get update
           sudo apt-get install \
             libxrandr-dev libxinerama-dev libxcursor-dev \
@@ -32,6 +37,7 @@ jobs:
           -DDAWN_BUILD_PROTOBUF=OFF
           -DTINT_BUILD_CMD_TOOLS=OFF
           -DTINT_BUILD_TESTS=OFF
+          -DCMAKE_CXX_FLAGS="-Wno-changes-meaning"
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
