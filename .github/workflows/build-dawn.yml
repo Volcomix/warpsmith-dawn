@@ -3,7 +3,7 @@ on: push
 jobs:
   build-dawn:
     name: Build Dawn
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - name: Clone Dawn Repository
         run: git clone --depth=1 https://dawn.googlesource.com/dawn
@@ -18,7 +18,6 @@ jobs:
           -DTINT_BUILD_CMD_TOOLS=OFF
           -DTINT_BUILD_TESTS=OFF
           -DDAWN_ENABLE_INSTALL=ON
-          -DCMAKE_CXX_STANDARD=20
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
@@ -28,5 +27,11 @@ jobs:
       - name: Package
         working-directory: dawn
         run: |
-          cmake --install out/Release --config Release --prefix Dawn-macos-14
-          cmake -E tar cvzf Dawn-macos-14.tar.gz Dawn-macos-14
+          cmake --install out/Release --prefix Dawn-macos-15
+          cmake -E tar cvzf Dawn-macos-15.tar.gz Dawn-macos-15
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dawn-macos-15
+          path: Dawn-macos-15.tar.gz
