@@ -15,11 +15,14 @@ jobs:
           -DDAWN_FETCH_DEPENDENCIES=ON
           -DDAWN_ENABLE_INSTALL=ON
           -DCMAKE_BUILD_TYPE=Release
+          -DDAWN_BUILD_SAMPLES=OFF
           -DDAWN_BUILD_PROTOBUF=OFF
+          -DTINT_BUILD_CMD_TOOLS=OFF
+          -DTINT_BUILD_TESTS=OFF
 
       - name: Build
         working-directory: dawn
-        run: cmake --build out/Release
+        run: cmake --build out/Release --target dawn_native
 
       - name: Package
         working-directory: dawn
