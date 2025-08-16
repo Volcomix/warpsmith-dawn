@@ -8,9 +8,6 @@ jobs:
       - name: Clone Dawn Repository
         run: git clone https://dawn.googlesource.com/dawn
 
-      - name: Select XCode
-        run: sudo xcode-select --switch /Applications/Xcode_15.3.app
-
       - name: Configure CMake
         working-directory: dawn
         run: >
@@ -18,10 +15,7 @@ jobs:
           -DDAWN_FETCH_DEPENDENCIES=ON
           -DDAWN_ENABLE_INSTALL=ON
           -DCMAKE_BUILD_TYPE=Release
-          -DDAWN_BUILD_SAMPLES=OFF
           -DDAWN_BUILD_PROTOBUF=OFF
-          -DTINT_BUILD_CMD_TOOLS=OFF
-          -DTINT_BUILD_TESTS=OFF
 
       - name: Build
         working-directory: dawn
