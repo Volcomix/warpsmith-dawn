@@ -1,8 +1,7 @@
 name: Build Dawn
 on:
-  push:
-  # schedule:
-  #   - cron: "0 5 * * *"
+  schedule:
+    - cron: "0 5 * * *"
 jobs:
   build-dawn:
     strategy:
@@ -14,6 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       SCCACHE_GHA_ENABLED: "true"
+
     steps:
       - name: Clone Dawn repository
         run: git clone --depth=1 https://dawn.googlesource.com/dawn
@@ -40,8 +40,8 @@ jobs:
           -DDAWN_BUILD_PROTOBUF=OFF
           -DTINT_BUILD_CMD_TOOLS=OFF
           -DTINT_BUILD_TESTS=OFF
-          -DCMAKE_CXX_COMPILER=clang++
           -DCMAKE_C_COMPILER=clang
+          -DCMAKE_CXX_COMPILER=clang++
           -DCMAKE_C_COMPILER_LAUNCHER=sccache
           -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
           -DCMAKE_BUILD_TYPE=Release
