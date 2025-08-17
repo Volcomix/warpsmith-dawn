@@ -6,7 +6,7 @@
     "test": "node test/bindings.ts"
   },
   "devDependencies": {
-    "@types/node": "^24.2.1",
+    "@types/node": "^24.3.0",
     "@webgpu/types": "^0.1.64",
     "node-addon-api": "^8.5.0"
   }

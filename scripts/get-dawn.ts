@@ -11,7 +11,8 @@ import { promisify } from "node:util";
 const exec = promisify(child_process.exec);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const repository = "google/dawn";
+const thisRepository = "volcomix/warpsmith-dawn";
+const dawnRepository = "google/dawn";
 const dawnBinariesDir = join(__dirname, "../dawn-binaries");
 
 process.loadEnvFile(".env.local");
@@ -21,61 +22,51 @@ if (!githubToken) {
   throw new Error("GITHUB_TOKEN is not set in the environment variables.");
 }
 
-function fetchFromDawnRepo(relativeUrl: string) {
-  return fetch(`https://api.github.com/repos/${repository}/${relativeUrl}`, {
-    headers: { Authorization: `Bearer ${githubToken}` },
-  });
+function fetchFromThisRepo(relativeUrl: string) {
+  return fetch(
+    `https://api.github.com/repos/${thisRepository}/${relativeUrl}`,
+    {
+      headers: { Authorization: `Bearer ${githubToken}` },
+    }
+  );
 }
 
-async function fetchTags() {
-  console.log("Fetching Dawn release tags...");
-  const response = await fetchFromDawnRepo("tags");
-  const tags = await response.json();
-  console.log(`Found ${tags.length} tags, checking for artifacts...`);
-  return tags;
+function fetchFromDawnRepo(relativeUrl: string) {
+  return fetch(
+    `https://api.github.com/repos/${dawnRepository}/${relativeUrl}`,
+    {
+      headers: { Authorization: `Bearer ${githubToken}` },
+    }
+  );
 }
 
 function getPlatform() {
   switch (process.platform) {
-    case "win32":
-      return "windows-latest";
     case "linux":
       return "ubuntu-latest";
     case "darwin":
-      switch (process.arch) {
-        case "arm64":
-          return "macos-latest";
-        case "x64":
-          return "macos-13";
-        default:
-          throw new Error(`Unsupported architecture: ${process.arch}`);
-      }
+      return "macos-15";
     default:
       throw new Error(`Unsupported platform: ${process.platform}`);
   }
 }
 
-async function findArtifactForTag(tag: any) {
-  process.stdout.write(`Checking ${tag.name}... `);
-
-  const response = await fetchFromDawnRepo(
-    `actions/artifacts?name=Dawn-${tag.commit.sha}-${getPlatform()}-Release`
+async function fetchArtifact() {
+  console.log("Fetching Dawn artifact...");
+  const response = await fetchFromThisRepo(
+    `actions/artifacts?name=dawn-${getPlatform()}&per_page=1`
   );
   const artifacts = await response.json();
-
-  if (artifacts.total_count === 0) {
-    console.log("no artifacts");
-    return null;
-  }
-
   const artifact = artifacts.artifacts[0];
   const sizeMB = (artifact.size_in_bytes / 1024 / 1024).toFixed(1);
-  console.log(`found (${sizeMB} MB)`);
+  console.log(
+    `Found artifact: ${artifact.name} | ${artifact.created_at} | ${sizeMB} MB`
+  );
   return artifact;
 }
 
 async function downloadArtifact(artifact: any) {
-  const response = await fetchFromDawnRepo(
+  const response = await fetchFromThisRepo(
     `actions/artifacts/${artifact.id}/zip`
   );
 
@@ -91,10 +82,8 @@ async function downloadArtifact(artifact: any) {
   console.log(`Downloaded: ${artifact.name}.zip`);
 }
 
-async function downloadDawnJson(tag: any) {
-  const response = await fetchFromDawnRepo(
-    `contents/src/dawn/dawn.json?ref=${tag.commit.sha}`
-  );
+async function downloadDawnJson() {
+  const response = await fetchFromDawnRepo("contents/src/dawn/dawn.json");
   const dawnJson = await response.json();
   const content = Buffer.from(dawnJson.content, "base64");
   await writeFile(`${dawnBinariesDir}/dawn.json`, content);
@@ -129,20 +118,13 @@ async function extractBinaries(artifact: any) {
 }
 
 async function setupDawnBinaries() {
-  const tags = await fetchTags();
-
-  for (const tag of tags) {
-    const artifact = await findArtifactForTag(tag);
-    if (artifact) {
-      console.log("Downloading...");
-      await mkdir(`${dawnBinariesDir}`, { recursive: true });
-      await Promise.all([
-        downloadArtifact(artifact).then(() => extractBinaries(artifact)),
-        downloadDawnJson(tag),
-      ]);
-      break;
-    }
-  }
+  const artifact = await fetchArtifact();
+  console.log("Downloading...");
+  await mkdir(`${dawnBinariesDir}`, { recursive: true });
+  await Promise.all([
+    downloadArtifact(artifact).then(() => extractBinaries(artifact)),
+    downloadDawnJson(),
+  ]);
 }
 
 setupDawnBinaries();
