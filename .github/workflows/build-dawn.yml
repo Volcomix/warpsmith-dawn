@@ -1,0 +1,63 @@
+name: Build Dawn
+on:
+  schedule:
+    - cron: "0 5 * * *"
+jobs:
+  build-dawn:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15]
+
+    name: Build Dawn on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    env:
+      SCCACHE_GHA_ENABLED: "true"
+
+    steps:
+      - name: Clone Dawn repository
+        run: git clone --depth=1 https://dawn.googlesource.com/dawn
+
+      - name: Install dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install \
+            libxrandr-dev libxinerama-dev libxcursor-dev \
+            mesa-common-dev libx11-xcb-dev pkg-config libxi-dev
+
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Configure CMake
+        working-directory: dawn
+        run: >
+          cmake -S . -B out/Release
+          -DDAWN_FETCH_DEPENDENCIES=ON
+          -DDAWN_ENABLE_INSTALL=ON
+          -DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED
+          -DDAWN_BUILD_SAMPLES=OFF
+          -DDAWN_BUILD_PROTOBUF=OFF
+          -DTINT_BUILD_CMD_TOOLS=OFF
+          -DTINT_BUILD_TESTS=OFF
+          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_CXX_COMPILER=clang++
+          -DCMAKE_C_COMPILER_LAUNCHER=sccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        working-directory: dawn
+        run: cmake --build out/Release
+
+      - name: Package
+        working-directory: dawn
+        run: |
+          cmake --install out/Release --prefix dawn-${{ matrix.os}}
+          cmake -E tar cvzf dawn-${{ matrix.os}}.tar.gz dawn-${{ matrix.os}}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dawn-${{ matrix.os}}
+          path: dawn/dawn-${{ matrix.os}}.tar.gz
