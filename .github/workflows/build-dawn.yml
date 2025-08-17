@@ -9,11 +9,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-15]
-        exclude:
-          - os: macos-15
 
     name: Build Dawn on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    env:
+      SCCACHE_GHA_ENABLED: "true"
     steps:
       - name: Clone Dawn repository
         run: git clone --depth=1 https://dawn.googlesource.com/dawn
@@ -26,6 +26,9 @@ jobs:
             libxrandr-dev libxinerama-dev libxcursor-dev \
             mesa-common-dev libx11-xcb-dev pkg-config libxi-dev
 
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
       - name: Configure CMake
         working-directory: dawn
         run: >
@@ -37,12 +40,15 @@ jobs:
           -DDAWN_BUILD_PROTOBUF=OFF
           -DTINT_BUILD_CMD_TOOLS=OFF
           -DTINT_BUILD_TESTS=OFF
-          -DCMAKE_CXX_FLAGS="-Wno-changes-meaning"
+          -DCMAKE_CXX_COMPILER=clang++
+          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_C_COMPILER_LAUNCHER=sccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         working-directory: dawn
-        run: cmake --build out/Release --target webgpu_dawn
+        run: cmake --build out/Release
 
       - name: Package
         working-directory: dawn
