@@ -15,18 +15,21 @@ const thisRepository = "volcomix/warpsmith-dawn";
 const dawnRepository = "google/dawn";
 const dawnBinariesDir = join(__dirname, "../dawn-binaries");
 
-process.loadEnvFile(".env.local");
-
-const githubToken = process.env.GITHUB_TOKEN;
-if (!githubToken) {
-  throw new Error("GITHUB_TOKEN is not set in the environment variables.");
+function loadGithubToken() {
+  if (!process.env.GITHUB_TOKEN) {
+    process.loadEnvFile(".env.local");
+  }
+  if (!process.env.GITHUB_TOKEN) {
+    throw new Error("GITHUB_TOKEN is not set in the environment variables.");
+  }
+  return process.env.GITHUB_TOKEN;
 }
 
 function fetchFromThisRepo(relativeUrl: string) {
   return fetch(
     `https://api.github.com/repos/${thisRepository}/${relativeUrl}`,
     {
-      headers: { Authorization: `Bearer ${githubToken}` },
+      headers: { Authorization: `Bearer ${loadGithubToken()}` },
     }
   );
 }
@@ -35,7 +38,7 @@ function fetchFromDawnRepo(relativeUrl: string) {
   return fetch(
     `https://api.github.com/repos/${dawnRepository}/${relativeUrl}`,
     {
-      headers: { Authorization: `Bearer ${githubToken}` },
+      headers: { Authorization: `Bearer ${loadGithubToken()}` },
     }
   );
 }
