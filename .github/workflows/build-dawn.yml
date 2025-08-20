@@ -1,7 +1,5 @@
 name: Build Dawn
-on:
-  schedule:
-    - cron: "0 5 * * *"
+on: push
 jobs:
   build-dawn:
     strategy:
@@ -16,7 +14,7 @@ jobs:
 
     steps:
       - name: Clone Dawn repository
-        run: git clone --depth=1 https://dawn.googlesource.com/dawn
+        run: git clone --revision=ce20ecbdef2cb921fe9bf9ddd51a67a7e5e94b46 --depth=1 https://dawn.googlesource.com/dawn
 
       - name: Install dependencies
         if: matrix.os == 'ubuntu-latest'
