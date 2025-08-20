@@ -1,9 +1,5 @@
 name: Test
-on:
-  workflow_run:
-    workflows: [Build Dawn]
-    types:
-      - completed
+on: push
 jobs:
   test:
     name: Test
