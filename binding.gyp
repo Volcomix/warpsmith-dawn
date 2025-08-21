@@ -14,8 +14,6 @@
             "conditions": [
                 ["OS=='linux'", {"variables": {"runtime_dir": "'$$ORIGIN'"}}],
             ],
-            "cflags_cc": ["-std=c++20"],
-            "cxx": "clang++",
             "link_settings": {
                 "libraries": [
                     "-lwebgpu_dawn",
