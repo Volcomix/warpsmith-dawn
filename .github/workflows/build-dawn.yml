@@ -1,7 +1,5 @@
 name: Build Dawn
-on:
-  schedule:
-    - cron: "0 5 * * *"
+on: push
 jobs:
   build-dawn:
     strategy:
@@ -40,6 +38,7 @@ jobs:
           -DDAWN_BUILD_PROTOBUF=OFF
           -DTINT_BUILD_CMD_TOOLS=OFF
           -DTINT_BUILD_TESTS=OFF
+          -DDAWN_ENABLE_ASAN=ON
           -DCMAKE_C_COMPILER=gcc
           -DCMAKE_CXX_COMPILER=g++
           -DCMAKE_C_COMPILER_LAUNCHER=sccache
