@@ -1,5 +1,7 @@
 name: Build Dawn
-on: push
+on:
+  schedule:
+    - cron: "0 5 * * *"
 jobs:
   build-dawn:
     strategy:
