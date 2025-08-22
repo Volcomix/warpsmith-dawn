@@ -1,7 +1,5 @@
 name: Build Dawn
-on:
-  schedule:
-    - cron: "0 5 * * *"
+on: push
 jobs:
   build-dawn:
     strategy:
@@ -18,14 +16,6 @@ jobs:
       - name: Clone Dawn repository
         run: git clone --depth=1 https://dawn.googlesource.com/dawn
 
-      - name: Install dependencies
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install \
-            libxrandr-dev libxinerama-dev libxcursor-dev \
-            mesa-common-dev libx11-xcb-dev pkg-config libxi-dev
-
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.9
 
@@ -38,11 +28,12 @@ jobs:
           -DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED
           -DDAWN_BUILD_SAMPLES=OFF
           -DDAWN_BUILD_PROTOBUF=OFF
+          -DDAWN_USE_X11=OFF
+          -DDAWN_USE_GLFW=OFF
           -DTINT_BUILD_CMD_TOOLS=OFF
           -DTINT_BUILD_TESTS=OFF
-          -DDAWN_ENABLE_ASAN=ON
-          -DCMAKE_C_COMPILER=gcc
-          -DCMAKE_CXX_COMPILER=g++
+          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_CXX_COMPILER=clang++
           -DCMAKE_C_COMPILER_LAUNCHER=sccache
           -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
           -DCMAKE_BUILD_TYPE=Release
